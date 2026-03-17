@@ -34,7 +34,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Generate application key and install dependencies
 RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts
+
+# Run artisan commands
+RUN php /var/www/html/artisan package:discover --ansi || true
 
 # Set permissions - must be writable for installer
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
