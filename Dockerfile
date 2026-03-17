@@ -32,10 +32,10 @@ RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Set permissions
+# Set permissions - 666 for .env (read/write), 644 for RouteServiceProvider
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod 644 /var/www/html/.env 2>/dev/null || true
-RUN chmod 644 /var/www/html/vendor/ 2>/dev/null || true
+RUN chmod 666 /var/www/html/.env 2>/dev/null || true
+RUN chmod 644 /var/www/html/app/Providers/RouteServiceProvider.php 2>/dev/null || true
 
 # Create storage link
 RUN php /var/www/html/artisan storage:link 2>/dev/null || true
