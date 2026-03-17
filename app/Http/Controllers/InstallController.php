@@ -118,24 +118,12 @@ class InstallController extends Controller
     }
 
     public function import_sql() {
-        $sql_path = base_path('shop.sql');
-        DB::unprepared(file_get_contents($sql_path));
+        // Database already imported via phpMyAdmin
         return redirect('step5');
     }
 
     public function import_sql_with_demo() {
-        $sql_path = base_path('shop.sql');
-        DB::unprepared(file_get_contents($sql_path));
-
-        // import sql
-        $sql_path = base_path('public/demo.sql');
-        DB::unprepared(file_get_contents($sql_path));
-
-        // extract images
-        $zip = new ZipArchive;
-        $zip->open(base_path('public/uploads.zip'));
-        $zip->extractTo('public/uploads/all/');
-        flash(translate('Demo data uploaded successfully'))->success();
+        // Database already imported via phpMyAdmin
         return redirect('step5');
     }
 
