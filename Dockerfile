@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo
+    && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
 
 # Set working directory
 WORKDIR /var/www/html
