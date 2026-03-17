@@ -38,6 +38,10 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-
 
 # Run artisan commands
 RUN php /var/www/html/artisan package:discover --ansi || true
+RUN php /var/www/html/artisan config:clear || true
+RUN php /var/www/html/artisan cache:clear || true
+RUN php /var/www/html/artisan view:clear || true
+RUN php /var/www/html/artisan route:clear || true
 
 # Set permissions - must be writable for installer
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
