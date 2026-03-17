@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli
+    && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo
 
 # Set working directory
 WORKDIR /var/www/html
@@ -32,11 +32,12 @@ RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Set permissions - make sure base directory is writable too
+# Set permissions - must be writable for installer
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 777 /var/www/html/ 2>/dev/null || true
-RUN chmod 666 /var/www/html/.env 2>/dev/null || true
-RUN chmod 777 /var/www/html/ 2>/dev/null || true
+RUN chmod -R 777 /var/www/html/
+RUN chmod 666 /var/www/html/.env
+RUN chmod 666 /var/www/html/app/Providers/RouteServiceProvider.php
+RUN chmod -R 777 /var/www/html/storage/framework/ /var/www/html/bootstrap/cache/
 
 # Create storage link
 RUN php /var/www/html/artisan storage:link 2>/dev/null || true
