@@ -14,5 +14,15 @@ if [ -f /var/www/html/.env.railway ]; then
     sed -i "s/\${RAILWAY_STATIC_URL}/${RAILWAY_STATIC_URL:-}/g" /var/www/html/.env
 fi
 
+# Clear Laravel cache
+cd /var/www/html
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Test database connection
+php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connected!';" || echo "Database connection failed!"
+
 # Start PHP server
 exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html
