@@ -35,6 +35,10 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod 644 /var/www/html/.env 2>/dev/null || true
+RUN chmod 644 /var/www/html/vendor/ 2>/dev/null || true
+
+# Create storage link
+RUN php /var/www/html/artisan storage:link 2>/dev/null || true
 
 # Expose port
 EXPOSE 8080
