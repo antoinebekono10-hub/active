@@ -53,20 +53,11 @@ RUN chmod -R 777 /var/www/html/storage/framework/ /var/www/html/bootstrap/cache/
 # Create storage link
 RUN php /var/www/html/artisan storage:link 2>/dev/null || true
 
+# Set permissions
+RUN chmod +x /var/www/html/start.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start PHP built-in server - regenerate .env at runtime with Railway variables
-CMD sh -c "php -r \"
-\$envContent = file_get_contents('/var/www/html/.env.railway');
-\$envContent = str_replace('\${MYSQLHOST}', getenv('MYSQLHOST') ?: 'localhost', \$envContent);
-\$envContent = str_replace('\${MYSQLPORT}', getenv('MYSQLPORT') ?: '3306', \$envContent);
-\$envContent = str_replace('\${MYSQLDATABASE}', getenv('MYSQLDATABASE') ?: 'railway', \$envContent);
-\$envContent = str_replace('\${MYSQLUSER}', getenv('MYSQLUSER') ?: 'root', \$envContent);
-\$envContent = str_replace('\${MYSQLPASSWORD}', getenv('MYSQLPASSWORD') ?: '', \$envContent);
-\$envContent = str_replace('\${REDISHOST}', getenv('REDISHOST') ?: '127.0.0.1', \$envContent);
-\$envContent = str_replace('\${REDISPASSWORD}', getenv('REDISPASSWORD') ?: '', \$envContent);
-\$envContent = str_replace('\${REDISPORT}', getenv('REDISPORT') ?: '6379', \$envContent);
-\$envContent = str_replace('\${RAILWAY_STATIC_URL}', getenv('RAILWAY_STATIC_URL') ?: '', \$envContent);
-file_put_contents('/var/www/html/.env', \$envContent);
-\" && php -S 0.0.0.0:${PORT:-8080} -t /var/www/html"
+# Start PHP built-in server
+CMD ["/var/www/html/start.sh"]
