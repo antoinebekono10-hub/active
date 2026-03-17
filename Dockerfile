@@ -21,8 +21,8 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
-# Create .env file if not exists
-RUN cp /var/www/html/.env.example /var/www/html/.env || true
+# Create .env file from .env.railway template
+RUN cp /var/www/html/.env.railway /var/www/html/.env || true
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
