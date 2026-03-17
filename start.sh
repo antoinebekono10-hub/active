@@ -20,6 +20,10 @@ if [ -f /var/www/html/.env.railway ]; then
     "
 fi
 
+# Enable PHP error display
+echo "display_errors=On" >> /usr/local/etc/php/conf.d/error_display.ini
+echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/error_display.ini
+
 # Clear ALL Laravel caches
 cd /var/www/html
 php artisan config:clear
@@ -27,5 +31,8 @@ php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 
-# Start PHP server with router script for proper Laravel routing
-exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php
+# Test database connection
+php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connected!\n';" 2>&1 || echo "Database connection FAILED!\n";
+
+# Start PHP server with error display
+exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php 2>&1
