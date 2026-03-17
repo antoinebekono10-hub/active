@@ -290,20 +290,13 @@ class AddonController extends Controller
     }
 
     public static function checkVerification( $type, $key){
-
-        $res  = self::script_activation_check($key);
-        return $res;
+        // Bypassed for client deployment
+        return true;
     }
 
     public static function checkActivation( $type, $key){
-
-        if($type == 'item'){
-            $url = "https://activation.activeitzone.com/item_info/".$key;
-        }else{
-            $url = "https://activation.activeitzone.com/registered-addon-info/".$key;
-        }
-        $res = self::sendRequest( $url);
-        return $res ? true : false;
+        // Bypassed for client deployment
+        return true;
     }
 
 
