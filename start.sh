@@ -20,20 +20,13 @@ if [ -f /var/www/html/.env.railway ]; then
     "
 fi
 
-# Show the generated .env for debugging
-echo "=== Generated .env ==="
-cat /var/www/html/.env
-echo "====================="
-
-# Clear Laravel cache
+# Clear ALL Laravel caches
 cd /var/www/html
 php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
-
-# Test database connection
-php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connected!';" 2>&1 || echo "Database connection failed!"
+php artisan route:cache
 
 # Start PHP server
 exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html
