@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Fix MPM conflict - disable mpm_event and mpm_worker
+RUN a2dismod mpm_event mpm_worker || true
+
 # Configure Apache document root
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
     && echo '    DocumentRoot /var/www/html/public' >> /etc/apache2/sites-available/000-default.conf \
