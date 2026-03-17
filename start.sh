@@ -26,7 +26,6 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
-php artisan route:cache
 
-# Start PHP server
-exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html
+# Start PHP server with router script for proper Laravel routing
+exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php
