@@ -34,6 +34,7 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod 644 /var/www/html/.env 2>/dev/null || true
 
 # Expose port
 EXPOSE 8080
