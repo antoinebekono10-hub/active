@@ -35,7 +35,7 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port
-EXPOSE $PORT
+EXPOSE 8080
 
 # Start PHP built-in server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=$PORT"]
+CMD sh -c "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
