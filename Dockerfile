@@ -37,5 +37,5 @@ RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 # Expose port
 EXPOSE 8080
 
-# Start PHP built-in server
-CMD sh -c "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
+# Start PHP built-in server from root directory
+CMD sh -c "php -S 0.0.0.0:${PORT:-8080} -t /var/www/html"
