@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath zip
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -41,7 +41,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Generate application key and install dependencies
 RUN php /var/www/html/artisan key:generate || true
-RUN composer install --no-dev --optimize-autoloader
+RUN composer config --global audit.block-insecure false
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
