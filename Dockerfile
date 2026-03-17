@@ -21,8 +21,12 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
-# Create .env file from .env.railway template
-RUN cp /var/www/html/.env.railway /var/www/html/.env || true
+# Create .env file from .env.railway template (or .env.example as fallback)
+RUN if [ -f /var/www/html/.env.railway ]; then \
+        cp /var/www/html/.env.railway /var/www/html/.env; \
+    elif [ -f /var/www/html/.env.example ]; then \
+        cp /var/www/html/.env.example /var/www/html/.env; \
+    fi
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -35,8 +39,8 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 # Set permissions - must be writable for installer
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/
-RUN chmod 666 /var/www/html/.env
-RUN chmod 666 /var/www/html/app/Providers/RouteServiceProvider.php
+RUN chmod 666 /var/www/html/.env 2>/dev/null || true
+RUN chmod 666 /var/www/html/app/Providers/RouteServiceProvider.php 2>/dev/null || true
 RUN chmod -R 777 /var/www/html/storage/framework/ /var/www/html/bootstrap/cache/
 
 # Create storage link
