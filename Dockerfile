@@ -68,10 +68,8 @@ RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
 
 # Install NPM dependencies and compile assets
-ENV PYTHON=python3
 RUN rm -f package-lock.json
-RUN npm install --ignore-scripts
-RUN npm install sass --ignore-scripts
+RUN npm install
 RUN NODE_OPTIONS=--openssl-legacy-provider npm run prod
 
 # Run artisan commands
