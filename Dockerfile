@@ -72,7 +72,7 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-
 ENV PYTHON=python3
 RUN npm install --ignore-scripts
 RUN npm install sass --ignore-scripts
-RUN npm run prod
+RUN NODE_OPTIONS=--openssl-legacy-provider npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
