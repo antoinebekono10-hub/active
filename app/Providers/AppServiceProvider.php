@@ -18,9 +18,6 @@ class AppServiceProvider extends ServiceProvider
   {
       Schema::defaultStringLength(191);
       Paginator::useBootstrap();
-      
-      // Force HTTPS URLs for Railway (behind HTTPS proxy)
-      URL::forceScheme('https');
   }
 
   /**
