@@ -13,7 +13,12 @@ if [ -f /var/www/html/.env.railway ]; then
     sed -i "s|APP_URL=.*|APP_URL=http://localhost:8080|g" /var/www/html/.env
     echo "FORCE_HTTPS=Off" >> /var/www/html/.env
     echo "ASSET_URL=http://localhost:8080" >> /var/www/html/.env
+    echo "APP_DEBUG=true" >> /var/www/html/.env
 fi
+
+# Enable PHP error display
+echo "display_errors=On" >> /usr/local/etc/php/conf.d/error_display.ini
+echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/error_display.ini
 
 # Clear Laravel cache
 cd /var/www/html
