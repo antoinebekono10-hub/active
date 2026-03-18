@@ -80,4 +80,4 @@ RUN chmod 666 /var/www/html/.env 2>/dev/null || true
 EXPOSE 80
 
 # Start PHP-FPM and Nginx
-CMD service php8.2-fpm start && nginx -g 'daemon off;'
+CMD php-fpm & nginx -g 'daemon off;'
