@@ -18,6 +18,10 @@ if [ -f /var/www/html/.env.railway ]; then
         \$env = str_replace('\${RAILWAY_STATIC_URL}', getenv('RAILWAY_STATIC_URL') ?: '', \$env);
         file_put_contents('/var/www/html/.env', \$env);
     "
+    
+    # Also fix APP_URL directly in .env file
+    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_STATIC_URL:-}|g" /var/www/html/.env
+    sed -i "s|ASSET_URL=.*|ASSET_URL=https://${RAILWAY_STATIC_URL:-}|g" /var/www/html/.env
 fi
 
 # Enable PHP error display
