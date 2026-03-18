@@ -31,22 +31,9 @@ php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 
-# Test database connection and import if needed
-php artisan tinker --execute="
-try {
-    \$tables = DB::select('SHOW TABLES');
-    if (count(\$tables) == 0) {
-        echo 'Database empty, importing shop.sql...';
-        \$sql = file_get_contents(base_path('shop.sql'));
-        DB::unprepared(\$sql);
-        echo 'Done!';
-    } else {
-        echo 'Database already has ' . count(\$tables) . ' tables';
-    }
-} catch (Exception \$e) {
-    echo 'Error: ' . \$e->getMessage();
-}
-" 2>&1
+# Test database connection and import if needed using shell command
+echo "Checking database..."
+mysql -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} -e "SHOW TABLES" 2>/dev/null | tail -n +2 | wc -l | xargs -I {} sh -c 'if [ {} -eq 0 ]; then echo "Database empty, importing..."; mysql -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} < /var/www/html/shop.sql 2>&1 && echo "Import done!" || echo "Import failed!"; else echo "Database already has tables"; fi'
 
 # Start PHP server
 exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php 2>&1
