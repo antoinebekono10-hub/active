@@ -31,8 +31,22 @@ php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 
-# Test database connection
-php artisan tinker --execute="DB::connection()->getPdo(); echo 'Database connected!\n';" 2>&1 || echo "Database connection FAILED!\n";
+# Test database connection and import if needed
+php artisan tinker --execute="
+try {
+    \$tables = DB::select('SHOW TABLES');
+    if (count(\$tables) == 0) {
+        echo 'Database empty, importing shop.sql...';
+        \$sql = file_get_contents(base_path('shop.sql'));
+        DB::unprepared(\$sql);
+        echo 'Done!';
+    } else {
+        echo 'Database already has ' . count(\$tables) . ' tables';
+    }
+} catch (Exception \$e) {
+    echo 'Error: ' . \$e->getMessage();
+}
+" 2>&1
 
-# Start PHP server with error display
+# Start PHP server
 exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php 2>&1
