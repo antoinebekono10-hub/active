@@ -13,6 +13,9 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js');
 
+// Disable minification to avoid UglifyJS compatibility issues on newer Node versions
+mix.webpackConfig({ optimization: { minimize: false } });
+
 // Ensure sass-loader uses dart-sass implementation to avoid node-sass requirements on newer Node versions
 try {
   const sass = require('sass');
