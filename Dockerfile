@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies, nginx, and Node.js
+# Install system dependencies, nginx, Node.js and Python
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     nginx \
     nodejs \
     npm \
+    python3 \
+    make \
+    g++ \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
@@ -78,7 +81,7 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-
 
 # Install NPM dependencies and compile assets
 RUN npm install
-RUN npm run prod
+RUN PYTHON=python3 npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
