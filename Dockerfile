@@ -67,8 +67,8 @@ RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
 
-# Skip npm compilation - use default Bootstrap CSS or CDN
-# The site will still function without compiled assets
+# Install npm dependencies and compile assets
+RUN npm install && npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
