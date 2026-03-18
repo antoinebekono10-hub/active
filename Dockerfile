@@ -13,14 +13,16 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     default-mysql-client \
     nginx \
-    nodejs \
-    npm \
     python3 \
     make \
     g++ \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
+
+# Install Node.js 18.x for compatibility with newer npm tooling
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
 # Configure Nginx
 RUN echo 'server { \
