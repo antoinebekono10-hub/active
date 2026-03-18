@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies and nginx
+# Install system dependencies, nginx, and Node.js
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     default-mysql-client \
     nginx \
+    nodejs \
+    npm \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
@@ -73,6 +75,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
+
+# Install NPM dependencies and compile assets
+RUN npm install
+RUN npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
