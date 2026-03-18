@@ -9,27 +9,24 @@ use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
-  /**
-   * Bootstrap any application services.
-   *
-   * @return void
-   */
-  public function boot()
-  {
-      Schema::defaultStringLength(191);
-      Paginator::useBootstrap();
-      
-      // Force HTTPS URLs for consistent URL generation
-      URL::forceScheme('https');
-  }
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+        Paginator::useBootstrap();
+    }
 
-  /**
-   * Register any application services.
-   *
-   * @return void
-   */
-  public function register()
-  {
-    //
-  }
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
 }
