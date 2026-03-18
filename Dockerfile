@@ -67,8 +67,12 @@ RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
 
-# Install npm dependencies and compile assets
-RUN npm install && npm run prod
+# Install npm dependencies (ignore scripts to avoid node-sass build failure)
+RUN npm install --ignore-scripts
+# Remove node-sass (incompatible with Node 20+)
+RUN rm -rf /var/www/html/node_modules/node-sass
+# Compile assets with sass (dart-sass)
+RUN npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
