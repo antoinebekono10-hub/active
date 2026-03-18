@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use URL;
 use DB;
 use Hash;
 use App\Models\BusinessSetting;
@@ -15,28 +14,25 @@ use ZipArchive;
 
 class InstallController extends Controller
 {
-    // Skip all installation steps - go directly to final
     public function step0() {
-        return redirect('/install/step5');
+        return response()->redirectToRoute('step5');
     }
 
     public function step1() {
-        return redirect('/install/step5');
+        return response()->redirectToRoute('step5');
     }
 
     public function step2() {
-        return redirect('/install/step5');
+        return response()->redirectToRoute('step5');
     }
 
     public function step3($error = "") {
-        // Skip installation if database already has tables
         try {
             $tables = DB::select('SHOW TABLES');
             if (count($tables) > 0) {
-                return redirect('step5');
+                return response()->redirectToRoute('step5');
             }
         } catch (\Exception $e) {
-            // Continue with installation
         }
         CoreComponentRepository::instantiateShopRepository();
         if($error == ""){
@@ -65,7 +61,7 @@ class InstallController extends Controller
         }
         Session::put('purchase_code', $request->purchase_code);
         $this->writeEnvironmentFile('SYSTEM_KEY', $request->system_key);
-        return redirect('step3');
+        return response()->redirectToRoute('step3');
     }
 
     public function system_settings(Request $request) {
@@ -88,13 +84,11 @@ class InstallController extends Controller
         $user->email_verified_at = date('Y-m-d H:m:s');
         $user->save();
 
-        //Assign Super-Admin Role
         $user->assignRole(['Super Admin']);
 
         $previousRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.php');
         $newRouteServiceProvier      = base_path('app/Providers/RouteServiceProvider.txt');
         copy($newRouteServiceProvier, $previousRouteServiceProvier);
-        //sleep(5);
 
         if (Session::has('purchase_code')) {
             $business_settings = new BusinessSetting;
@@ -106,35 +100,32 @@ class InstallController extends Controller
         Artisan::call('optimize:clear');
         return view('installation.step6');
     }
-    public function database_installation(Request $request) {
 
+    public function database_installation(Request $request) {
         if(self::check_database_connection($request->DB_HOST, $request->DB_DATABASE, $request->DB_USERNAME, $request->DB_PASSWORD)) {
             $path = base_path('.env');
             if (file_exists($path)) {
                 foreach ($request->types as $type) {
                     $this->writeEnvironmentFile($type, $request[$type]);
                 }
-                return redirect('step4');
+                return response()->redirectToRoute('step4');
             }else {
-                return redirect('step3');
+                return response()->redirectToRoute('step3');
             }
         }else {
-            return redirect('step3/database_error');
+            return response()->redirectToRoute('step3', ['error' => 'database_error']);
         }
     }
 
     public function import_sql() {
-        // Database already imported via phpMyAdmin
-        return redirect('step5');
+        return response()->redirectToRoute('step5');
     }
 
     public function import_sql_with_demo() {
-        // Database already imported via phpMyAdmin
-        return redirect('step5');
+        return response()->redirectToRoute('step5');
     }
 
     function check_database_connection($db_host = "", $db_name = "", $db_user = "", $db_pass = "") {
-
         if(@mysqli_connect($db_host, $db_user, $db_pass, $db_name)) {
             return true;
         }else {
