@@ -1,4 +1,5 @@
 FROM php:8.2-fpm
+ENV NODE_OPTIONS=--openssl-legacy-provider
 
 # Install system dependencies, nginx, Node.js and Python
 RUN apt-get update && apt-get install -y \
