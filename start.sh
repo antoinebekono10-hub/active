@@ -31,9 +31,9 @@ php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 
-# Test database connection and import if needed using shell command
+# Test database connection and import if needed using shell command (skip SSL)
 echo "Checking database..."
-mysql -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} -e "SHOW TABLES" 2>/dev/null | tail -n +2 | wc -l | xargs -I {} sh -c 'if [ {} -eq 0 ]; then echo "Database empty, importing..."; mysql -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} < /var/www/html/shop.sql 2>&1 && echo "Import done!" || echo "Import failed!"; else echo "Database already has tables"; fi'
+mysql --ssl-verify-server-cert=0 -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} -e "SHOW TABLES" 2>/dev/null | tail -n +2 | wc -l | xargs -I {} sh -c 'if [ {} -eq 0 ]; then echo "Database empty, importing..."; mysql --ssl-verify-server-cert=0 -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} < /var/www/html/shop.sql 2>&1 && echo "Import done!" || echo "Import failed!"; else echo "Database already has tables"; fi'
 
 # Start PHP server
 exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php 2>&1
