@@ -18,10 +18,12 @@ RUN apt-get update && apt-get install -y \
 
 # Configure Nginx
 RUN echo 'server { \
-    listen 80; \
+    listen $PORT; \
     server_name _; \
     root /var/www/html; \
     index index.php index.html; \
+    \
+    client_max_body_size 100M; \
     \
     location / { \
         try_files $uri $uri/ /index.php?$query_string; \
@@ -43,41 +45,37 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/sites-available/default
 
-# Copy nginx config
-RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-
 # Set working directory
 WORKDIR /var/www/html
 
 # Copy application files
 COPY . /var/www/html
 
-# Create .env file from .env.railway template
-RUN if [ -f /var/www/html/.env.railway ]; then \
-        cp /var/www/html/.env.railway /var/www/html/.env; \
-    elif [ -f /var/www/html/.env.example ]; then \
-        cp /var/www/html/.env.example /var/www/html/.env; \
-    fi
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Generate application key and install dependencies
-RUN php /var/www/html/artisan key:generate || true
-RUN composer config --global audit.block-insecure false
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts
-
-# Run artisan commands
-RUN php /var/www/html/artisan package:discover --ansi || true
-RUN php /var/www/html/artisan config:clear || true
+# Create startup script
+RUN echo '#!/bin/bash \
+# Replace Railway variables \
+if [ -f /var/www/html/.env.railway ]; then \
+    cp /var/www/html/.env.railway /var/www/html/.env \
+    sed -i "s|\${MYSQLHOST}|${MYSQLHOST:-localhost}|g" /var/www/html/.env \
+    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" /var/www/html/.env \
+    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE:-railway}|g" /var/www/html/.env \
+    sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-root}|g" /var/www/html/.env \
+    sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD}|g" /var/www/html/.env \
+    sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL}|g" /var/www/html/.env \
+    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_STATIC_URL:-}|g" /var/www/html/.env \
+fi \
+echo "Starting PHP-FPM and Nginx..." \
+php-fpm & \
+nginx -g "daemon off;" \
+' > /start.sh && chmod +x /start.sh
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/
 RUN chmod 666 /var/www/html/.env 2>/dev/null || true
 
-# Expose port 80
-EXPOSE 80
+# Expose port
+EXPOSE 80 8080 3000
 
-# Start PHP-FPM and Nginx
-CMD php-fpm & nginx -g 'daemon off;'
+# Run startup script
+CMD ["/start.sh"]
