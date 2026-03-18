@@ -67,9 +67,11 @@ RUN php /var/www/html/artisan key:generate || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
 
-# Install NPM dependencies and compile assets
+# Install NPM dependencies - ignore node-sass build scripts
 RUN rm -f package-lock.json
-RUN npm install
+RUN npm install --ignore-scripts
+RUN rm -rf node_modules/node-sass
+RUN npm install sass
 RUN NODE_OPTIONS=--openssl-legacy-provider npm run prod
 
 # Run artisan commands
