@@ -68,8 +68,9 @@ RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
 
 # Install NPM dependencies and compile assets
+ENV PYTHON=python3
 RUN npm install
-RUN PYTHON=python3 npm run prod
+RUN npm run prod
 
 # Run artisan commands
 RUN php /var/www/html/artisan config:clear || true
