@@ -15,10 +15,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
 
-# Enable Apache mod_rewrite and fix MPM
-RUN a2enmod rewrite
-RUN a2dismod mpm_event mpm_worker || true
-RUN a2enmod mpm_prefork || true
+# Fix MPM conflict - disable all MPM and enable only prefork
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mpm_*.conf 2>/dev/null || true
+RUN a2enmod rewrite mpm_prefork
 
 # Configure Apache - point to root directory (this project has index.php at root)
 RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
