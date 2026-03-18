@@ -3,12 +3,20 @@
 # Replace Railway variables
 if [ -f /var/www/html/.env.railway ]; then
     cp /var/www/html/.env.railway /var/www/html/.env
-    sed -i "s|\${MYSQLHOST}|${MYSQLHOST:-localhost}|g" /var/www/html/.env
-    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" /var/www/html/.env
-    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE:-railway}|g" /var/www/html/.env
-    sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-root}|g" /var/www/html/.env
+    echo "MYSQLHOST: ${MYSQLHOST}"
+    echo "MYSQLPORT: ${MYSQLPORT}"
+    echo "MYSQLDATABASE: ${MYSQLDATABASE}"
+    echo "MYSQLUSER: ${MYSQLUSER}"
+    # Do not echo MYSQLPASSWORD for security
+    echo "RAILWAY_STATIC_URL: ${RAILWAY_STATIC_URL}"
+    sed -i "s|\${MYSQLHOST}|${MYSQLHOST}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLPORT}|${MYSQLPORT}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLUSER}|${MYSQLUSER}|g" /var/www/html/.env
     sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD}|g" /var/www/html/.env
     sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL}|g" /var/www/html/.env
+else
+    echo ".env.railway not found"
 fi
 
 # Enable PHP error display
