@@ -25,6 +25,27 @@ cd /var/www/html
 php artisan config:clear 2>/dev/null || true
 php artisan cache:clear 2>/dev/null || true
 
+# Create admin user if not exists
+php artisan tinker --execute="
+try {
+    \$user = App\Models\User::where('email', 'admin@admin.com')->first();
+    if (!\$user) {
+        App\Models\User::create([
+            'name' => 'Admin',
+            'email' => 'admin@admin.com',
+            'password' => Hash::make('123456'),
+            'email_verified_at' => now(),
+            'user_type' => 'admin'
+        ]);
+        echo 'Admin user created!';
+    } else {
+        echo 'Admin user already exists';
+    }
+} catch (Exception \$e) {
+    echo 'Error: ' . \$e->getMessage();
+}
+" 2>/dev/null || true
+
 echo "Starting PHP-FPM and Nginx on port 8080..."
 php-fpm &
 nginx -g "daemon off;"
