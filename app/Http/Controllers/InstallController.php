@@ -20,12 +20,12 @@ class InstallController extends Controller
         try {
             $tables = DB::select('SHOW TABLES');
             if (count($tables) > 0) {
-                return redirect('step5');
+                return redirect('/install/step5');
             }
         } catch (\Exception $e) {
             // Continue with installation
         }
-        $this->writeEnvironmentFile('APP_URL', URL::to('/'));
+        $this->writeEnvironmentFile('APP_URL', 'http://localhost');
         return view('installation.step0');
     }
 
@@ -34,7 +34,7 @@ class InstallController extends Controller
         try {
             $tables = DB::select('SHOW TABLES');
             if (count($tables) > 0) {
-                return redirect('step5');
+                return redirect('/install/step5');
             }
         } catch (\Exception $e) {
             // Continue with installation
@@ -50,7 +50,7 @@ class InstallController extends Controller
         try {
             $tables = DB::select('SHOW TABLES');
             if (count($tables) > 0) {
-                return redirect('step5');
+                return redirect('/install/step5');
             }
         } catch (\Exception $e) {
             // Continue with installation
