@@ -4,9 +4,8 @@
 .env.php
 
 /node_modules
-/public/assets
 /public/storage
-/public/uploads
+/public/uploads.zip
 /storage/*.key
 /storage/debugbar
 /vendor
@@ -21,6 +20,8 @@ yarn-error.log
 .DS_Store
 .idea/
 /public/*
+!/public/uploads
+!/public/assets
 updates/
 composer.lock
 *.lock
@@ -32,6 +33,3 @@ install.zip
 /nbproject
 /public/app-translations
 public/uploads.zip
-.env
-public/all
-
