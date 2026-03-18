@@ -37,8 +37,6 @@ RUN echo 'server { \
         include fastcgi_params; \
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
         fastcgi_param PATH_INFO $fastcgi_path_info; \
-        fastcgi_param HTTPS on; \
-        fastcgi_param HTTP_X_FORWARDED_PROTO https; \
     } \
     \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
