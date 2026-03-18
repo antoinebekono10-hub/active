@@ -69,7 +69,9 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-
 
 # Install NPM dependencies and compile assets
 ENV PYTHON=python3
-RUN npm install
+RUN rm -f package-lock.json
+RUN npm install --ignore-scripts
+RUN npm install sass --ignore-scripts
 RUN NODE_OPTIONS=--openssl-legacy-provider npm run prod
 
 # Run artisan commands
