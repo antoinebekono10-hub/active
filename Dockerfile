@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 RUN echo 'server { \
     listen 8080; \
     server_name _; \
-    root /var/www/html; \
+    root /var/www/html/public; \
     index index.php index.html; \
     \
     client_max_body_size 100M; \
@@ -42,18 +42,6 @@ RUN echo 'server { \
         include fastcgi_params; \
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
         fastcgi_param PATH_INFO $fastcgi_path_info; \
-    } \
-    \
-    location /assets/ { \
-        alias /var/www/html/public/assets/; \
-        expires 30d; \
-        add_header Cache-Control "public, immutable"; \
-    } \
-    \
-    location /uploads/ { \
-        alias /var/www/html/public/uploads/; \
-        expires 30d; \
-        add_header Cache-Control "public, immutable"; \
     } \
     \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
