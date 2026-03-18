@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 
 # Configure Nginx
 RUN echo 'server { \
-    listen $PORT; \
+    listen 8080; \
     server_name _; \
     root /var/www/html; \
     index index.php index.html; \
@@ -51,23 +51,21 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
-# Create startup script
-RUN echo '#!/bin/bash \
-# Replace Railway variables \
-if [ -f /var/www/html/.env.railway ]; then \
-    cp /var/www/html/.env.railway /var/www/html/.env \
-    sed -i "s|\${MYSQLHOST}|${MYSQLHOST:-localhost}|g" /var/www/html/.env \
-    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" /var/www/html/.env \
-    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE:-railway}|g" /var/www/html/.env \
-    sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-root}|g" /var/www/html/.env \
-    sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD}|g" /var/www/html/.env \
-    sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL}|g" /var/www/html/.env \
-    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_STATIC_URL:-}|g" /var/www/html/.env \
-fi \
-echo "Starting PHP-FPM and Nginx..." \
-php-fpm & \
-nginx -g "daemon off;" \
-' > /start.sh && chmod +x /start.sh
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Generate key and install dependencies
+RUN php /var/www/html/artisan key:generate || true
+RUN composer config --global audit.block-insecure false
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
+
+# Run artisan commands
+RUN php /var/www/html/artisan config:clear || true
+RUN php /var/www/html/artisan package:discover --ansi || true
+
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
@@ -75,7 +73,7 @@ RUN chmod -R 777 /var/www/html/
 RUN chmod 666 /var/www/html/.env 2>/dev/null || true
 
 # Expose port
-EXPOSE 80 8080 3000
+EXPOSE 8080
 
 # Run startup script
 CMD ["/start.sh"]
