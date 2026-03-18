@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,20 +14,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
-
-# Fix MPM conflict - disable all MPM and enable only prefork
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mpm_*.conf 2>/dev/null || true
-RUN a2enmod rewrite mpm_prefork
-
-# Configure Apache - point to root directory (this project has index.php at root)
-RUN echo '<VirtualHost *:80>' > /etc/apache2/sites-available/000-default.conf \
-    && echo '    DocumentRoot /var/www/html' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '    <Directory /var/www/html>' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '        Options -Indexes +FollowSymLinks' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '        AllowOverride All' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '        Require all granted' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '    </Directory>' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '</VirtualHost>' >> /etc/apache2/sites-available/000-default.conf
 
 # Set working directory
 WORKDIR /var/www/html
@@ -53,14 +39,16 @@ RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-
 # Run artisan commands
 RUN php /var/www/html/artisan package:discover --ansi || true
 RUN php /var/www/html/artisan config:clear || true
+RUN php /var/www/html/artisan route:clear || true
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/
 RUN chmod 666 /var/www/html/.env 2>/dev/null || true
+RUN chmod +x /var/www/html/start.sh
 
-# Expose port 80
-EXPOSE 80
+# Expose port
+EXPOSE 8080
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Start PHP built-in server with proper router
+CMD ["/var/www/html/start.sh"]

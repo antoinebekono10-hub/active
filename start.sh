@@ -27,35 +27,11 @@ fi
 # Enable PHP error display
 echo "display_errors=On" >> /usr/local/etc/php/conf.d/error_display.ini
 echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/error_display.ini
-echo "log_errors=On" >> /usr/local/etc/php/conf.d/error_display.ini
-echo "error_log=/tmp/php_errors.log" >> /usr/local/etc/php/conf.d/error_display.ini
 
-# Clear ALL Laravel caches
+# Clear Laravel caches
 cd /var/www/html
 php artisan config:clear 2>&1 || true
-php artisan cache:clear 2>&1 || true
 php artisan route:clear 2>&1 || true
-php artisan view:clear 2>&1 || true
 
-# Test database connection
-echo "Testing database connection..."
-php -r "
-try {
-    \$pdo = new PDO('mysql:host=${MYSQLHOST:-localhost};port=${MYSQLPORT:-3306};dbname=${MYSQLDATABASE:-railway}', '${MYSQLUSER:-root}', '${MYSQLPASSWORD:-}');
-    echo 'Database connected successfully!';
-} catch (PDOException \$e) {
-    echo 'Database connection failed: ' . \$e->getMessage();
-}
-" 2>&1
-
-# Test Laravel route
-echo "Testing Laravel route..."
-php /var/www/html/artisan route:list 2>&1 | head -20
-
-# Show .env content for debugging
-echo "=== .env content ==="
-cat /var/www/html/.env
-echo "==================="
-
-# Start PHP server with full error output
-exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/server.php 2>&1
+# Start PHP server using router
+exec php -S 0.0.0.0:${PORT:-8080} -t /var/www/html /var/www/html/router.php
