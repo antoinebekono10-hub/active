@@ -10,26 +10,26 @@ if [ -f /var/www/html/.env.railway ]; then
     
     # Debug: Show environment variables received from Railway
     echo "===== RAILWAY ENVIRONMENT VARIABLES ====="
-    echo "MYSQLHOST: '${MYSQLHOST}'"
-    echo "MYSQLPORT: '${MYSQLPORT}'"
-    echo "MYSQLDATABASE: '${MYSQLDATABASE}'"
-    echo "MYSQLUSER: '${MYSQLUSER}'"
+    echo "MYSQL_HOST: '${MYSQL_HOST}'"
+    echo "MYSQL_PORT: '${MYSQL_PORT}'"
+    echo "MYSQL_DATABASE: '${MYSQL_DATABASE}'"
+    echo "MYSQL_USERNAME: '${MYSQL_USERNAME}'"
     # Don't print password for security, but check if it's set
-    if [ -z "${MYSQLPASSWORD}" ]; then
-        echo "MYSQLPASSWORD: '[EMPTY]'"
+    if [ -z "${MYSQL_PASSWORD}" ]; then
+        echo "MYSQL_PASSWORD: '[EMPTY]'"
     else
-        echo "MYSQLPASSWORD: '[SET]'"
+        echo "MYSQL_PASSWORD: '[SET]'"
     fi
     echo "RAILWAY_STATIC_URL: '${RAILWAY_STATIC_URL}'"
     echo "===== END RAILWAY ENVIRONMENT VARIABLES ====="
     
     # Check if any critical variables are empty
     MISSING_VARS=()
-    [ -z "${MYSQLHOST}" ] && MISSING_VARS+=("MYSQLHOST")
-    [ -z "${MYSQLPORT}" ] && MISSING_VARS+=("MYSQLPORT")
-    [ -z "${MYSQLDATABASE}" ] && MISSING_VARS+=("MYSQLDATABASE")
-    [ -z "${MYSQLUSER}" ] && MISSING_VARS+=("MYSQLUSER")
-    [ -z "${MYSQLPASSWORD}" ] && MISSING_VARS+=("MYSQLPASSWORD")
+    [ -z "${MYSQL_HOST}" ] && MISSING_VARS+=("MYSQL_HOST")
+    [ -z "${MYSQL_PORT}" ] && MISSING_VARS+=("MYSQL_PORT")
+    [ -z "${MYSQL_DATABASE}" ] && MISSING_VARS+=("MYSQL_DATABASE")
+    [ -z "${MYSQL_USERNAME}" ] && MISSING_VARS+=("MYSQL_USERNAME")
+    [ -z "${MYSQL_PASSWORD}" ] && MISSING_VARS+=("MYSQL_PASSWORD")
     [ -z "${RAILWAY_STATIC_URL}" ] && MISSING_VARS+=("RAILWAY_STATIC_URL")
     
     if [ ${#MISSING_VARS[@]} -gt 0 ]; then
@@ -41,32 +41,32 @@ if [ -f /var/www/html/.env.railway ]; then
     echo "===== PERFORMING VARIABLE SUBSTITUTION ====="
     # Show what we're about to substitute
     echo "Before substitution - checking for placeholders in .env:"
-    grep -n "\${MYSQLHOST}\|\${MYSQLPORT}\|\${MYSQLDATABASE}\|\${MYSQLUSER}\|\${MYSQLPASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env || echo "No placeholders found (already substituted or not present)"
+    grep -n "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env || echo "No placeholders found (already substituted or not present)"
     
     # Perform substitutions with error checking
-    echo "Substituting MYSQLHOST..."
-    sed -i "s|\${MYSQLHOST}|${MYSQLHOST:-placeholder_not_set}|g" /var/www/html/.env
+    echo "Substituting MYSQL_HOST..."
+    sed -i "s|\${MYSQL_HOST}|${MYSQL_HOST:-placeholder_not_set}|g" /var/www/html/.env
     
-    echo "Substituting MYSQLPORT..."
-    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-placeholder_not_set}|g" /var/www/html/.env
+    echo "Substituting MYSQL_PORT..."
+    sed -i "s|\${MYSQL_PORT}|${MYSQL_PORT:-placeholder_not_set}|g" /var/www/html/.env
     
-    echo "Substituting MYSQLDATABASE..."
-    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE:-placeholder_not_set}|g" /var/www/html/.env
+    echo "Substituting MYSQL_DATABASE..."
+    sed -i "s|\${MYSQL_DATABASE}|${MYSQL_DATABASE:-placeholder_not_set}|g" /var/www/html/.env
     
-    echo "Substituting MYSQLUSER..."
-    sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-placeholder_not_set}|g" /var/www/html/.env
+    echo "Substituting MYSQL_USERNAME..."
+    sed -i "s|\${MYSQL_USERNAME}|${MYSQL_USERNAME:-placeholder_not_set}|g" /var/www/html/.env
     
-    echo "Substituting MYSQLPASSWORD..."
-    sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD:-placeholder_not_set}|g" /var/www/html/.env
+    echo "Substituting MYSQL_PASSWORD..."
+    sed -i "s|\${MYSQL_PASSWORD}|${MYSQL_PASSWORD:-placeholder_not_set}|g" /var/www/html/.env
     
     echo "Substituting RAILWAY_STATIC_URL..."
     sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL:-placeholder_not_set}|g" /var/www/html/.env
     
     # Check if any placeholders remain
     echo "After substitution - checking for remaining placeholders:"
-    if grep -q "\${MYSQLHOST}\|\${MYSQLPORT}\|\${MYSQLDATABASE}\|\${MYSQLUSER}\|\${MYSQLPASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env; then
+    if grep -q "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env; then
         echo "ERROR: Some placeholders were not substituted!"
-        grep -n "\${MYSQLHOST}\|\${MYSQLPORT}\|\${MYSQLDATABASE}\|\${MYSQLUSER}\|\${MYSQLPASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env
+        grep -n "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env
     else
         echo "SUCCESS: All placeholders appear to have been substituted"
     fi
