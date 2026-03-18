@@ -19,7 +19,8 @@ class AppServiceProvider extends ServiceProvider
       Schema::defaultStringLength(191);
       Paginator::useBootstrap();
       
-      // Let Laravel detect HTTPS from Nginx forwarded headers
+      // Force HTTPS URLs for Railway (behind HTTPS proxy)
+      URL::forceScheme('https');
   }
 
   /**
