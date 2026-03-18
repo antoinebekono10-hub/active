@@ -19,10 +19,7 @@ class AppServiceProvider extends ServiceProvider
       Schema::defaultStringLength(191);
       Paginator::useBootstrap();
       
-      // Force HTTP URLs to avoid scheme malformed error
-      if (env('FORCE_HTTPS', 'Off') === 'Off') {
-          URL::forceScheme('http');
-      }
+      // Let Laravel detect HTTPS from Nginx forwarded headers
   }
 
   /**
