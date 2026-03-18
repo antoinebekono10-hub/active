@@ -13,3 +13,21 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
    .sass('resources/sass/app.scss', 'public/css');
+
+// Ensure sass-loader uses dart-sass implementation to avoid node-sass requirements on newer Node versions
+try {
+  const sass = require('sass');
+  mix.webpackConfig({
+    module: {
+      rules: [
+        {
+          test: /\.scss$/,
+          loader: 'sass-loader',
+          options: { implementation: sass },
+        },
+      ],
+    },
+  });
+} catch (e) {
+  // If sass isn't installed, fallback to default behaviour
+}
