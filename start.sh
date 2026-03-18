@@ -8,22 +8,15 @@ if [ -f /var/www/html/.env.railway ]; then
     cp /var/www/html/.env.railway /var/www/html/.env
     echo "INFO: Copied .env.railway to .env"
     
-    # Debug: Show environment variables received from Railway
-    echo "===== RAILWAY ENVIRONMENT VARIABLES ====="
-    echo "MYSQL_HOST: '${MYSQL_HOST}'"
-    echo "MYSQL_PORT: '${MYSQL_PORT}'"
-    echo "MYSQL_DATABASE: '${MYSQL_DATABASE}'"
-    echo "MYSQL_USERNAME: '${MYSQL_USERNAME}'"
-    # Don't print password for security, but check if it's set
-    if [ -z "${MYSQL_PASSWORD}" ]; then
-        echo "MYSQL_PASSWORD: '[EMPTY]'"
-    else
-        echo "MYSQL_PASSWORD: '[SET]'"
-    fi
-    echo "RAILWAY_STATIC_URL: '${RAILWAY_STATIC_URL}'"
-    echo "===== END RAILWAY ENVIRONMENT VARIABLES ====="
+    # Debug: Show all environment variables that start with MYSQL
+    echo "===== MYSQL ENVIRONMENT VARIABLES ====="
+    env | grep ^MYSQL
+    echo "===== END MYSQL ENVIRONMENT VARIABLES ====="
     
-    # Check if any critical variables are empty
+    # Also show RAILWAY_STATIC_URL
+    echo "RAILWAY_STATIC_URL: '${RAILWAY_STATIC_URL}'"
+    
+    # Check if any critical variables are empty (using correct Railway variable names)
     MISSING_VARS=()
     [ -z "${MYSQL_HOST}" ] && MISSING_VARS+=("MYSQL_HOST")
     [ -z "${MYSQL_PORT}" ] && MISSING_VARS+=("MYSQL_PORT")
@@ -43,7 +36,7 @@ if [ -f /var/www/html/.env.railway ]; then
     echo "Before substitution - checking for placeholders in .env:"
     grep -n "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env || echo "No placeholders found (already substituted or not present)"
     
-    # Perform substitutions with error checking
+    # Perform substitutions with error checking (using correct Railway variable names)
     echo "Substituting MYSQL_HOST..."
     sed -i "s|\${MYSQL_HOST}|${MYSQL_HOST:-placeholder_not_set}|g" /var/www/html/.env
     
