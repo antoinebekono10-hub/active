@@ -53,6 +53,9 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
+# Use Railway environment
+RUN cp .env.railway .env
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 

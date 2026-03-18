@@ -9,11 +9,6 @@ if [ -f /var/www/html/.env.railway ]; then
     sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-root}|g" /var/www/html/.env
     sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD}|g" /var/www/html/.env
     sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL}|g" /var/www/html/.env
-    # Use localhost for now to avoid redirect issues
-    sed -i "s|APP_URL=.*|APP_URL=http://localhost:8080|g" /var/www/html/.env
-    echo "FORCE_HTTPS=Off" >> /var/www/html/.env
-    echo "ASSET_URL=http://localhost:8080" >> /var/www/html/.env
-    echo "APP_DEBUG=true" >> /var/www/html/.env
 fi
 
 # Enable PHP error display

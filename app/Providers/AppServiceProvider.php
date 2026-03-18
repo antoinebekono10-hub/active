@@ -19,10 +19,8 @@ class AppServiceProvider extends ServiceProvider
       Schema::defaultStringLength(191);
       Paginator::useBootstrap();
       
-      // Force HTTPS URLs if configured
-      if (env('FORCE_HTTPS', 'Off') === 'On') {
-          URL::forceScheme('https');
-      }
+      // Force HTTPS URLs for consistent URL generation
+      URL::forceScheme('https');
   }
 
   /**
