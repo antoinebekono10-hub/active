@@ -15,47 +15,17 @@ use ZipArchive;
 
 class InstallController extends Controller
 {
+    // Skip all installation steps - go directly to final
     public function step0() {
-        // Skip installation if database already has tables
-        try {
-            $tables = DB::select('SHOW TABLES');
-            if (count($tables) > 0) {
-                return redirect('/install/step5');
-            }
-        } catch (\Exception $e) {
-            // Continue with installation
-        }
-        $this->writeEnvironmentFile('APP_URL', 'http://localhost');
-        return view('installation.step0');
+        return redirect('/install/step5');
     }
 
     public function step1() {
-        // Skip installation if database already has tables
-        try {
-            $tables = DB::select('SHOW TABLES');
-            if (count($tables) > 0) {
-                return redirect('/install/step5');
-            }
-        } catch (\Exception $e) {
-            // Continue with installation
-        }
-        $permission['curl_enabled']           = function_exists('curl_version');
-        $permission['db_file_write_perm']     = is_writable(base_path('.env'));
-        $permission['routes_file_write_perm'] = is_writable(base_path('app/Providers/RouteServiceProvider.php'));
-        return view('installation.step1', compact('permission'));
+        return redirect('/install/step5');
     }
 
     public function step2() {
-        // Skip installation if database already has tables
-        try {
-            $tables = DB::select('SHOW TABLES');
-            if (count($tables) > 0) {
-                return redirect('/install/step5');
-            }
-        } catch (\Exception $e) {
-            // Continue with installation
-        }
-        return view('installation.step2');
+        return redirect('/install/step5');
     }
 
     public function step3($error = "") {
