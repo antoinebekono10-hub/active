@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 # Install system dependencies and nginx
 RUN apt-get update && apt-get install -y \
@@ -19,7 +19,8 @@ RUN docker-php-ext-configure gd \
     && docker-php-ext-install mbstring exif pcntl bcmath zip mysqli pdo pdo_mysql
 
 # Configure Nginx for Laravel
-COPY nginx.conf /etc/nginx/sites-available/default
+RUN rm -f /etc/nginx/sites-enabled/default
+COPY nginx.conf /etc/nginx/sites-enabled/default
 
 # Set working directory
 WORKDIR /var/www/html
@@ -27,18 +28,25 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html
 
+# REMOVE vendor - it was installed with wrong PHP version
+RUN rm -rf /var/www/html/vendor || true
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Generate key and install dependencies
-RUN php artisan key:generate --force 2>/dev/null || true
-RUN composer config --global audit.block-insecure false
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
-RUN composer dump-autoload --optimize --no-dev || true
+# Clear composer cache
+RUN composer clear-cache
 
-# Run artisan commands
+# Install dependencies with correct PHP version
+RUN composer config --global audit.block-insecure false
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts
+
+# Remove platform_check that checks PHP version
+RUN rm -f /var/www/html/vendor/composer/platform_check.php || true
+
+# Generate key and clear caches
+RUN php artisan key:generate --force 2>/dev/null || true
 RUN php artisan config:clear || true
-RUN php artisan package:discover --ansi || true
 
 # Set permissions
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
