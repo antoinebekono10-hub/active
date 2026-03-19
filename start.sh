@@ -1,121 +1,69 @@
 #!/bin/bash
+set -e
 
-echo "===== STARTUP SCRIPT EXECUTION BEGIN ====="
+echo "=== Starting MERCA Application ==="
 
-# Replace Railway variables
+# Replace Railway variables in .env
 if [ -f /var/www/html/.env.railway ]; then
-    echo "INFO: Found .env.railway file"
+    echo "Generating .env from template..."
     cp /var/www/html/.env.railway /var/www/html/.env
-    echo "INFO: Copied .env.railway to .env"
     
-    # Debug: Show all environment variables that start with MYSQL
-    echo "===== MYSQL ENVIRONMENT VARIABLES ====="
-    env | grep ^MYSQL
-    echo "===== END MYSQL ENVIRONMENT VARIABLES ====="
+    # Replace MySQL variables
+    sed -i "s|\${MYSQLHOST}|${MYSQLHOST:-localhost}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLDATABASE}|${MYSQLDATABASE:-railway}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLUSER}|${MYSQLUSER:-root}|g" /var/www/html/.env
+    sed -i "s|\${MYSQLPASSWORD}|${MYSQLPASSWORD}|g" /var/www/html/.env
     
-    # Also show RAILWAY_STATIC_URL
-    echo "RAILWAY_STATIC_URL: '${RAILWAY_STATIC_URL}'"
+    # Replace Redis variables
+    sed -i "s|\${REDISHOST}|${REDISHOST:-127.0.0.1}|g" /var/www/html/.env
+    sed -i "s|\${REDISPASSWORD}|${REDISPASSWORD}|g" /var/www/html/.env
+    sed -i "s|\${REDISPORT}|${REDISPORT:-6379}|g" /var/www/html/.env
     
-    # Check if any critical variables are empty (using correct Railway variable names)
-    MISSING_VARS=()
-    [ -z "${MYSQL_HOST}" ] && MISSING_VARS+=("MYSQL_HOST")
-    [ -z "${MYSQL_PORT}" ] && MISSING_VARS+=("MYSQL_PORT")
-    [ -z "${MYSQL_DATABASE}" ] && MISSING_VARS+=("MYSQL_DATABASE")
-    [ -z "${MYSQL_USERNAME}" ] && MISSING_VARS+=("MYSQL_USERNAME")
-    [ -z "${MYSQL_PASSWORD}" ] && MISSING_VARS+=("MYSQL_PASSWORD")
-    [ -z "${RAILWAY_STATIC_URL}" ] && MISSING_VARS+=("RAILWAY_STATIC_URL")
+    # Replace Railway URL
+    sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL}|g" /var/www/html/.env
     
-    if [ ${#MISSING_VARS[@]} -gt 0 ]; then
-        echo "ERROR: Missing or empty variables: ${MISSING_VARS[*]}"
-    else
-        echo "INFO: All critical variables appear to be set"
-    fi
+    # Set APP_URL for Railway
+    sed -i "s|APP_URL=.*|APP_URL=https://${RAILWAY_STATIC_URL}|g" /var/www/html/.env
+    sed -i "s|ASSET_URL=.*|ASSET_URL=|g" /var/www/html/.env
     
-    echo "===== PERFORMING VARIABLE SUBSTITUTION ====="
-    # Show what we're about to substitute
-    echo "Before substitution - checking for placeholders in .env:"
-    grep -n "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env || echo "No placeholders found (already substituted or not present)"
-    
-    # Perform substitutions with error checking (using correct Railway variable names)
-    echo "Substituting MYSQL_HOST..."
-    sed -i "s|\${MYSQL_HOST}|${MYSQL_HOST:-placeholder_not_set}|g" /var/www/html/.env
-    
-    echo "Substituting MYSQL_PORT..."
-    sed -i "s|\${MYSQL_PORT}|${MYSQL_PORT:-placeholder_not_set}|g" /var/www/html/.env
-    
-    echo "Substituting MYSQL_DATABASE..."
-    sed -i "s|\${MYSQL_DATABASE}|${MYSQL_DATABASE:-placeholder_not_set}|g" /var/www/html/.env
-    
-    echo "Substituting MYSQL_USERNAME..."
-    sed -i "s|\${MYSQL_USERNAME}|${MYSQL_USERNAME:-placeholder_not_set}|g" /var/www/html/.env
-    
-    echo "Substituting MYSQL_PASSWORD..."
-    sed -i "s|\${MYSQL_PASSWORD}|${MYSQL_PASSWORD:-placeholder_not_set}|g" /var/www/html/.env
-    
-    echo "Substituting RAILWAY_STATIC_URL..."
-    sed -i "s|\${RAILWAY_STATIC_URL}|${RAILWAY_STATIC_URL:-placeholder_not_set}|g" /var/www/html/.env
-    
-    # Check if any placeholders remain
-    echo "After substitution - checking for remaining placeholders:"
-    if grep -q "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env; then
-        echo "ERROR: Some placeholders were not substituted!"
-        grep -n "\${MYSQL_HOST}\|\${MYSQL_PORT}\|\${MYSQL_DATABASE}\|\${MYSQL_USERNAME}\|\${MYSQL_PASSWORD}\|\${RAILWAY_STATIC_URL}" /var/www/html/.env
-    else
-        echo "SUCCESS: All placeholders appear to have been substituted"
-    fi
-    
-    # Show a sample of the final .env (masked)
-    echo "===== FINAL .ENV SAMPLE (first 5 lines, values masked) ====="
-    head -5 /var/www/html/.env | while IFS= read -r line; do
-        if [[ $line =~ ^[^=]+= ]]; then
-            key="${line%%=*}"
-            echo "${key}=[VALUE_MASKED]"
-        else
-            echo "$line"
-        fi
-    done
-    echo "===== END .ENV SAMPLE ====="
-else
-    echo "ERROR: .env.railway file not found at /var/www/html/.env.railway"
-    echo "Directory contents:"
-    ls -la /var/www/html/
+    # Ensure HTTPS is off for HTTP connections
+    sed -i "s|FORCE_HTTPS=.*|FORCE_HTTPS=Off|g" /var/www/html/.env
 fi
 
-# Enable PHP error display
-echo "display_errors=On" >> /usr/local/etc/php/conf.d/error_display.ini
-echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/error_display.ini
+# Ensure .env exists
+if [ ! -f /var/www/html/.env ]; then
+    echo "WARNING: .env not found, creating from .env.example..."
+    cp /var/www/html/.env.example /var/www/html/.env 2>/dev/null || true
+fi
 
-# Clear Laravel cache
-echo "===== CLEARING LARAVEL CACHE ====="
+# Clear Laravel caches
 cd /var/www/html
-php artisan config:clear 2>/dev/null || echo "WARNING: config:clear failed"
-php artisan cache:clear 2>/dev/null || echo "WARNING: cache:clear failed"
+echo "Clearing Laravel caches..."
+php artisan config:clear 2>/dev/null || true
+php artisan cache:clear 2>/dev/null || true
+php artisan route:clear 2>/dev/null || true
+php artisan view:clear 2>/dev/null || true
 
-# Create admin user if not exists
-echo "===== CHECKING/CREATING ADMIN USER ====="
-php artisan tinker --execute="
-try {
-    \$user = App\Models\User::where('email', 'admin@admin.com')->first();
-    if (!\$user) {
-        App\Models\User::create([
-            'name' => 'Admin',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('123456'),
-            'email_verified_at' => now(),
-            'user_type' => 'admin'
-        ]);
-        echo 'Admin user created!';
-    } else {
-        echo 'Admin user already exists';
-    }
-} catch (Exception \$e) {
-    echo 'Error during admin user check/creation: ' . \$e->getMessage();
-}
-" 2>/dev/null || true
+# Check and import database if empty
+echo "Checking database..."
+TABLE_COUNT=$(mysql --ssl-verify-server-cert=0 -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} -e "SHOW TABLES" 2>/dev/null | tail -n +2 | wc -l || echo "0")
+echo "Database has $TABLE_COUNT tables"
 
-echo "===== STARTING SERVICES ====="
-echo "Starting PHP-FPM and Nginx on port 8080..."
+if [ "$TABLE_COUNT" -eq 0 ]; then
+    echo "Database is empty, importing shop.sql..."
+    mysql --ssl-verify-server-cert=0 -h ${MYSQLHOST:-localhost} -P ${MYSQLPORT:-3306} -u ${MYSQLUSER:-root} -p${MYSQLPASSWORD:-} ${MYSQLDATABASE:-railway} < /var/www/html/shop.sql 2>/dev/null && echo "Import complete!" || echo "Import failed!"
+else
+    echo "Database already has data, skipping import."
+fi
+
+# Show .env for debugging
+echo "=== Current .env (APP_URL) ==="
+grep APP_URL /var/www/html/.env || echo "APP_URL not found"
+
+echo "=== Starting PHP-FPM and Nginx ==="
+echo "PHP-FPM and Nginx started on port 8080"
+
+# Start services
 php-fpm &
 nginx -g "daemon off;"
-
-echo "===== STARTUP SCRIPT EXECUTION END ====="
