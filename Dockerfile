@@ -34,6 +34,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN php artisan key:generate --force 2>/dev/null || true
 RUN composer config --global audit.block-insecure false
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts || true
+RUN composer dump-autoload --optimize --no-dev || true
 
 # Run artisan commands
 RUN php artisan config:clear || true
@@ -43,6 +44,11 @@ RUN php artisan package:discover --ansi || true
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/
 RUN chmod -R 777 /var/www/html/storage/framework/views 2>/dev/null || true
+RUN chmod -R 777 /var/www/html/storage/logs 2>/dev/null || true
+RUN chmod -R 777 /var/www/html/storage/app 2>/dev/null || true
+RUN chmod -R 777 /var/www/html/storage/framework/cache 2>/dev/null || true
+RUN touch /var/www/html/storage/logs/laravel.log 2>/dev/null || true
+RUN chmod 666 /var/www/html/storage/logs/laravel.log 2>/dev/null || true
 
 # Copy startup script
 COPY start.sh /start.sh
